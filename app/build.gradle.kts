@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "dev.hrx.libregadgets"
-        minSdk = 24
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.squareup.okhttp)
     implementation(libs.squareup.okhttp.coroutines)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.kieronquinn.smartspacer)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

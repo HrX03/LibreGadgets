@@ -8,14 +8,16 @@ data class LoginBody(
     val password: String,
 )
 
+sealed class LoginResponse
+
 @Serializable
-data class LoginRedirectResponse(val status: Long, val data: LoginRedirectData)
+data class LoginSuccessResponse(val status: Long, val data: LoginData) : LoginResponse()
+
+@Serializable
+data class LoginRedirectResponse(val status: Long, val data: LoginRedirectData) : LoginResponse()
 
 @Serializable
 data class LoginRedirectData(val redirect: Boolean, val region: String)
-
-@Serializable
-data class LoginResponse(val status: Long, val data: LoginData)
 
 @Serializable
 data class LoginData(

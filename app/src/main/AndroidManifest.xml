@@ -3,6 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <queries>
+        <package android:name="com.freestylelibre.app.it"/>
+        <package android:name="org.nativescript.LibreLinkUp"/>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -26,7 +35,7 @@
             </intent-filter>
         </activity>
         
-        <receiver android:name=".glance.GlucoseAppWidgetReceiver"
+        <receiver android:name=".gadgets.GlucoseAppWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
@@ -36,11 +45,28 @@
                 android:resource="@xml/glucose_widget"/>
         </receiver>
 
-        <service android:name=".service.ApiPollService"
+        <receiver android:name=".communication.GlucoseEventReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="dev.hrx.libregadgets.broadcast.new_measurement" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".communication.GlucosePollService"
             android:exported="false"
-            android:description="@string/poll_service_description">
+            android:description="@string/poll_service_description"
+            android:foregroundServiceType="dataSync">
 
         </service>
+
+        <provider
+            android:name=".gadgets.GlucoseComplication"
+            android:authorities="${applicationId}.complication.example"
+            android:permission="com.kieronquinn.app.smartspacer.permission.ACCESS_SMARTSPACER_COMPLICATIONS"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.kieronquinn.app.smartspacer.COMPLICATION" />
+            </intent-filter>
+        </provider>
     </application>
 
 </manifest>

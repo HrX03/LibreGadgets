@@ -1,9 +1,11 @@
 package dev.hrx.libregadgets
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,20 +30,37 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import dev.hrx.libregadgets.api.LibreLinkApi
-import dev.hrx.libregadgets.glance.updateWidget
-import dev.hrx.libregadgets.service.ApiPollService
+import dev.hrx.libregadgets.gadgets.updateWidget
+import dev.hrx.libregadgets.communication.GlucosePollService
+import dev.hrx.libregadgets.gadgets.updateComplication
 import dev.hrx.libregadgets.storage.GlucoseMeasurement
-import dev.hrx.libregadgets.storage.GraphMeasurement
+import dev.hrx.libregadgets.storage.GlucoseThresholds
 import dev.hrx.libregadgets.storage.MeasurementEvaluation
 import dev.hrx.libregadgets.storage.MeasurementTrend
 import dev.hrx.libregadgets.storage.SharedStorage
 import dev.hrx.libregadgets.ui.theme.LibreGadgetsTheme
+import dev.hrx.libregadgets.utils.getTimestamp
 import kotlinx.coroutines.launch
+import java.text.DateFormat
 
 class MainActivity : ComponentActivity() {
+    private lateinit var storage: SharedStorage
+    private val notificationPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) {
+            // if permission was denied, the service can still run only the notification won't be visible
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        checkAndRequestNotificationPermission()
+        storage =  SharedStorage(this)
+        if (storage.jwtToken.isNotEmpty())
+            startForegroundService(Intent(this, GlucosePollService::class.java))
+
         setContent {
             LibreGadgetsTheme {
                 // A surface container using the 'background' color from the theme
@@ -51,6 +70,23 @@ class MainActivity : ComponentActivity() {
                         LoginStack(modifier = Modifier.padding(padding))
                     },
                 )
+            }
+        }
+    }
+
+    private fun checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            )) {
+                android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+                    // permission already granted
+                }
+
+                else -> {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
         }
     }
@@ -119,19 +155,19 @@ fun LoginStack(modifier: Modifier) {
                         storage.jwtToken = response.data.authTicket.token
                         setMessage("Login success, welcome ${response.data.user.firstName} ${response.data.user.lastName}")
 
-                        context.startService(Intent(context, ApiPollService::class.java))
+                        context.startService(Intent(context, GlucosePollService::class.java))
 
                         val connectionResponse = api.getConnection() ?: return@launch
                         val patient = connectionResponse.data.first()
 
-                        storage.latestMeasurement = GlucoseMeasurement(
+                        val measurement = GlucoseMeasurement(
                             value = patient.glucoseMeasurement.value,
                             evaluation = when {
                                 patient.glucoseMeasurement.isHigh -> MeasurementEvaluation.High
                                 patient.glucoseMeasurement.isLow -> MeasurementEvaluation.Low
                                 else -> MeasurementEvaluation.Normal
                             },
-                            trend = when(patient.glucoseMeasurement.trendArrow) {
+                            trend = when (patient.glucoseMeasurement.trendArrow) {
                                 1 -> MeasurementTrend.FallQuick
                                 2 -> MeasurementTrend.Fall
                                 3 -> MeasurementTrend.Normal
@@ -139,9 +175,20 @@ fun LoginStack(modifier: Modifier) {
                                 5 -> MeasurementTrend.FallQuick
                                 else -> MeasurementTrend.Unknown
                             },
+                            timestamp = getTimestamp(patient.glucoseMeasurement.timestamp)
+                        )
+                        val thresholds = GlucoseThresholds(
+                            low = patient.targetLow,
+                            high = patient.targetHigh,
                         )
 
+                        storage.latestMeasurement = measurement
+                        storage.glucoseThresholds = thresholds
+
                         updateWidget(context)
+                        updateComplication(context)
+
+                        context.startForegroundService(Intent(context, GlucosePollService::class.java))
                     } else {
                         setMessage("Login failure")
                     }

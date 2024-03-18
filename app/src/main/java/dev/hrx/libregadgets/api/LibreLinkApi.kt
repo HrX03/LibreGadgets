@@ -4,13 +4,12 @@ import android.content.Context
 import android.util.Log
 import dev.hrx.libregadgets.api.types.ConnectionResponse
 import dev.hrx.libregadgets.api.types.LoginBody
-import dev.hrx.libregadgets.api.types.LoginResponse
+import dev.hrx.libregadgets.api.types.LoginSuccessResponse
 import dev.hrx.libregadgets.storage.SharedStorage
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
-import okhttp3.Call
-import okhttp3.Callback
+import kotlinx.serialization.json.jsonObject
 import okhttp3.Headers.Companion.toHeaders
 import okhttp3.Interceptor
 import okhttp3.MediaType
@@ -19,7 +18,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okhttp3.internal.readBomAsCharset
 import ru.gildor.coroutines.okhttp.await
 import java.io.IOException
 
@@ -51,7 +49,7 @@ class LibreLinkApi(context: Context) {
     }
     private var reqURL: String = BASE_API_URL
 
-    suspend fun login(email: String, password: String): LoginResponse? {
+    suspend fun login(email: String, password: String): LoginSuccessResponse? {
         val jsonBody = encoder.encodeToString(LoginBody(email, password))
         val body = jsonBody.toRequestBody(JSON)
         val req = Request.Builder()
@@ -64,17 +62,17 @@ class LibreLinkApi(context: Context) {
             val response = client.newCall(req).await()
             val responseBody = response.body?.string()
 
-            if (responseBody != null) {
-                Log.d("LibreLinkApi", responseBody)
-                return encoder.decodeFromString<LoginResponse>(responseBody)
+            if (responseBody == null) {
+                Log.e("LibreLinkApi", "Login call returned no body")
+                return null
             }
 
-            Log.e("LibreLinkApi", "Login call returned no body")
+            Log.d("LibreLinkApi", responseBody)
+            return encoder.decodeFromString<LoginSuccessResponse>(responseBody)
         } catch (e: IOException) {
             Log.e("LibreLinkApi", "Net call failed: $e")
+            return null
         }
-
-        return null
     }
 
     suspend fun getConnection(): ConnectionResponse? {
