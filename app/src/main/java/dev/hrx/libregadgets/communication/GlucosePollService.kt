@@ -33,8 +33,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json.Default.encodeToString
-import java.text.DateFormat
-import java.util.Date
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -81,7 +79,7 @@ class GlucosePollService : Service() {
         val recIntent = ContextCompat.registerReceiver(
             this,
             repeatingIntentBroadcastReceiver,
-            IntentFilter("dev.hrx.libregadgets.broadcast.get_measurement"),
+            IntentFilter("dev.hrx.libregadgets.broadcast.GET_MEASUREMENT"),
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
 
@@ -104,7 +102,7 @@ class GlucosePollService : Service() {
         delay: Duration = TICKER_PERIOD_DELAY,
     ) {
         val intent =
-            Intent("dev.hrx.libregadgets.broadcast.get_measurement").setPackage(packageName)
+            Intent("dev.hrx.libregadgets.broadcast.GET_MEASUREMENT").setPackage(packageName)
         sendBroadcast(intent)
         alarmManager.setRepeating(
             AlarmManager.RTC,
@@ -128,7 +126,7 @@ class GlucosePollService : Service() {
                 // we still need to send this broadcast as a "ping" event to make sure it still
                 // gets checked on.
                 val intent = Intent().also { intent ->
-                    intent.setAction("dev.hrx.libregadgets.broadcast.new_measurement")
+                    intent.setAction("dev.hrx.libregadgets.broadcast.NEW_MEASUREMENT")
                     intent.setPackage("dev.hrx.libregadgets")
                 }
 
@@ -164,7 +162,7 @@ class GlucosePollService : Service() {
             Log.d(TAG, "emitting measurement")
 
             val intent = Intent().also { intent ->
-                intent.setAction("dev.hrx.libregadgets.broadcast.new_measurement")
+                intent.setAction("dev.hrx.libregadgets.broadcast.NEW_MEASUREMENT")
                 intent.putExtra(
                     "measurement",
                     encodeToString(GlucoseMeasurement.serializer(), measurement)

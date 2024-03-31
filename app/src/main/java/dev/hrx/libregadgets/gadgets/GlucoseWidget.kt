@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -38,21 +37,19 @@ import dev.hrx.libregadgets.R
 import dev.hrx.libregadgets.storage.GlucoseThresholds
 import dev.hrx.libregadgets.storage.MeasurementTrend
 import dev.hrx.libregadgets.storage.SharedStorage
+import dev.hrx.libregadgets.ui.theme.GlucoseCautionColor
+import dev.hrx.libregadgets.ui.theme.GlucoseColor
+import dev.hrx.libregadgets.ui.theme.GlucoseErrorColor
+import dev.hrx.libregadgets.ui.theme.GlucoseHighColor
+import dev.hrx.libregadgets.ui.theme.GlucoseLowColor
+import dev.hrx.libregadgets.ui.theme.GlucoseNormalColor
+import dev.hrx.libregadgets.utils.formatGlucoseValue
 import dev.hrx.libregadgets.utils.getClickIntent
 import dev.hrx.libregadgets.utils.isMeasurementStale
-
 
 class GlucoseAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = GlucoseAppWidget()
 }
-
-val GLUCOSE_LOW = Color(0xFFC62828)
-val GLUCOSE_NORMAL = Color(0xFF2E7D32)
-val GLUCOSE_VERY_HIGH = Color(0xFFE65100)
-val GLUCOSE_OUTSIDE_THRESHOLD = Color(0xFFFF8F00)
-val GLUCOSE_UNKNOWN = Color(0xFF424242)
-
-val WHITE = ColorProvider(Color(0xFFFFFFFF))
 
 private class GlucoseAppWidget : GlanceAppWidget() {
     private lateinit var storage: SharedStorage
@@ -74,6 +71,8 @@ private class GlucoseAppWidget : GlanceAppWidget() {
         val icon = arrowProviderForType(currentData?.trend)
         val isStale =
             currentData != null && isMeasurementStale(System.currentTimeMillis(), currentData)
+        val glucoseColor =
+            if (!isStale) colorForValue(currentData?.value, thresholds) else GlucoseErrorColor
 
         Column(
             modifier = GlanceModifier
@@ -85,31 +84,37 @@ private class GlucoseAppWidget : GlanceAppWidget() {
                     end = 14.dp,
                 )
                 .appWidgetBackground()
-                .background(if(!isStale) colorForValue(currentData?.value, thresholds) else ColorProvider(GLUCOSE_UNKNOWN))
+                .background(ColorProvider(glucoseColor.background))
                 .apply {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         cornerRadius(android.R.dimen.system_app_widget_background_radius)
                     }
                 }
-                .clickable(actionStartActivity(getClickIntent(context)))
+                .clickable(
+                    actionStartActivity(
+                        getClickIntent(
+                            context, forceAppActivity = currentData == null
+                        )
+                    )
+                )
         ) {
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = currentData?.value?.toString() ?: "---",
+                    text = formatGlucoseValue(currentData?.value),
                     style = TextStyle(
                         fontSize = 40.sp,
                         fontWeight = FontWeight.Bold,
-                        color = WHITE,
+                        color = ColorProvider(glucoseColor.foreground),
                     ),
                 )
                 Spacer(modifier = GlanceModifier.defaultWeight())
                 if (currentData != null && icon != null && !isStale) Image(
                     provider = ImageProvider(icon),
                     contentDescription = "Current glucose trend",
-                    colorFilter = ColorFilter.tint(WHITE),
+                    colorFilter = ColorFilter.tint(ColorProvider(glucoseColor.foreground)),
                 )
             }
             Spacer(modifier = GlanceModifier.defaultWeight())
@@ -118,7 +123,7 @@ private class GlucoseAppWidget : GlanceAppWidget() {
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
-                    color = WHITE,
+                    color = ColorProvider(glucoseColor.foreground),
                 ),
                 text = if (isStale) "Stale" else (textForValue(currentData?.value, thresholds)
                     ?: "Need setup"),
@@ -137,26 +142,25 @@ private class GlucoseAppWidget : GlanceAppWidget() {
         }
     }
 
-    private fun colorForValue(value: Int?, thresholds: GlucoseThresholds): ColorProvider {
-        return ColorProvider(
-            when {
-                value == null -> GLUCOSE_UNKNOWN
-                value > 240 -> GLUCOSE_VERY_HIGH
-                value > thresholds.high -> GLUCOSE_OUTSIDE_THRESHOLD
-                value < 70 -> GLUCOSE_LOW
-                value < thresholds.low -> GLUCOSE_OUTSIDE_THRESHOLD
-                else -> GLUCOSE_NORMAL
-            }
-        )
+    private fun colorForValue(value: Int?, thresholds: GlucoseThresholds): GlucoseColor {
+        return when {
+            value == null -> GlucoseErrorColor
+            value > 240 -> GlucoseHighColor
+            value > thresholds.high -> GlucoseCautionColor
+            value < 70 -> GlucoseLowColor
+            value < thresholds.low -> GlucoseCautionColor
+            else -> GlucoseNormalColor
+        }
+
     }
 
     private fun textForValue(value: Int?, thresholds: GlucoseThresholds): String? {
         return when {
             value == null -> null
             value > 240 -> "High"
-            value > thresholds.high -> "Going high"
+            value > thresholds.high -> "Caution"
             value < 70 -> "Low"
-            value < thresholds.low -> "Going low"
+            value < thresholds.low -> "Caution"
             else -> "Normal"
         }
     }

@@ -12,14 +12,18 @@ import com.kieronquinn.app.smartspacer.sdk.utils.ComplicationTemplate
 import dev.hrx.libregadgets.R
 import dev.hrx.libregadgets.storage.MeasurementTrend
 import dev.hrx.libregadgets.storage.SharedStorage
+import dev.hrx.libregadgets.utils.formatGlucoseValue
 import dev.hrx.libregadgets.utils.getClickIntent
 
-class GlucoseComplication: SmartspacerComplicationProvider() {
+class GlucoseComplication : SmartspacerComplicationProvider() {
     override fun getConfig(smartspacerId: String?): Config {
         return Config(
-            "Live glucose Complication",
-            "A smartspacer complication to display your current blood glucose with a trend, polled from LibreLinkUp",
-            AndroidIcon.createWithResource(provideContext(), R.drawable.ic_launcher_foreground),
+            label = "Live glucose Complication",
+            description = "A smartspacer complication to display your current blood glucose with a trend, polled from LibreLinkUp",
+            icon = AndroidIcon.createWithResource(
+                provideContext(),
+                R.drawable.ic_launcher_foreground
+            ),
             refreshPeriodMinutes = 1
         )
     }
@@ -27,13 +31,18 @@ class GlucoseComplication: SmartspacerComplicationProvider() {
     override fun getSmartspaceActions(smartspacerId: String): List<SmartspaceAction> {
         val storage = SharedStorage(provideContext())
         val measurement = storage.latestMeasurement
-        val icon = if(measurement != null) arrowProviderForType(measurement.trend) else null
+        val icon = if (measurement != null) arrowProviderForType(measurement.trend) else null
 
         return listOf(
             ComplicationTemplate.Basic(
                 id = "glucose_complication",
-                content = Text(storage.latestMeasurement?.value?.toString() ?: "---"),
-                icon = if(icon != null) Icon(AndroidIcon.createWithResource(provideContext(), icon)) else null,
+                content = Text(formatGlucoseValue(measurement?.value)),
+                icon = if (icon != null) Icon(
+                    AndroidIcon.createWithResource(
+                        provideContext(),
+                        icon
+                    )
+                ) else null,
                 onClick = TapAction(
                     intent = Intent().setComponent(getClickIntent(provideContext()))
                 )

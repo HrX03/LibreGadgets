@@ -6,15 +6,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.icu.text.DateFormat
-import android.icu.text.SimpleDateFormat
-import dev.hrx.libregadgets.gadgets.updateComplication
-import dev.hrx.libregadgets.gadgets.updateWidget
 import dev.hrx.libregadgets.storage.GlucoseMeasurement
 import java.text.ParseException
-import java.util.Date
 import java.util.concurrent.TimeUnit
 
-fun getClickIntent(context: Context): ComponentName {
+fun getClickIntent(context: Context, forceAppActivity: Boolean = false): ComponentName {
+    if (forceAppActivity) return ComponentName(
+        context.packageName,
+        "${context.packageName}.MainActivity"
+    )
+
     return canStartIntent(
         context,
         "com.freestylelibre.app.it",
@@ -48,9 +49,18 @@ fun isMeasurementStale(currentTimestamp: Long, measurement: GlucoseMeasurement):
 fun getTimestamp(date: String): Long {
     val parsedDate = try {
         DateFormat.getInstanceForSkeleton("M/d/yyyy h:mm:ss a").parse(date)
-    } catch(_: ParseException) {
+    } catch (_: ParseException) {
         null
     }
 
     return parsedDate?.time ?: System.currentTimeMillis()
+}
+
+fun formatGlucoseValue(value: Int?): String {
+    return when {
+        value == null -> "--"
+        value < 40 -> "LO"
+        value > 400 -> "HI"
+        else -> value.toString()
+    }
 }

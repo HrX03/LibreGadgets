@@ -30,7 +30,6 @@
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -47,7 +46,13 @@
 
         <receiver android:name=".communication.GlucoseEventReceiver" android:exported="false">
             <intent-filter>
-                <action android:name="dev.hrx.libregadgets.broadcast.new_measurement" />
+                <action android:name="dev.hrx.libregadgets.broadcast.NEW_MEASUREMENT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".communication.BootStartReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
@@ -55,7 +60,6 @@
             android:exported="false"
             android:description="@string/poll_service_description"
             android:foregroundServiceType="dataSync">
-
         </service>
 
         <provider

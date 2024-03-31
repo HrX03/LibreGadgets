@@ -3,12 +3,13 @@ package dev.hrx.libregadgets.api.types
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Serializable
 data class CountryResponse(val status: Int, val data: CountryResponseData)
 
 @Serializable
 data class CountryResponseData(
     @SerialName("CaptureAnalytics")
-    val captureAnalytics: Boolean,
+    val captureAnalytics: String,
     @SerialName("CountryList")
     val countryList: CountryList,
     @SerialName("LSL-ServiceURL")
@@ -26,7 +27,7 @@ data class CountryResponseData(
     val alarmVersions: AlarmVersions,
     val alarmsEnabled: List<String>,
     val features: Features,
-    val heartbeatAlarmVersions: String,
+    val heartbeatAlarmVersions: String?,
     val heartbeatMilliseconds: Int,
     val lluPrivacyPolicyHtml: Map<String, String>,
     val lluPrivacyPolicyVersions: Map<String, String>,
@@ -36,7 +37,7 @@ data class CountryResponseData(
     val lluToUHtml: Map<String, String>,
     val lluToUVersions: Map<String, String>,
     val lslApi: String,
-    val lv : String,
+    val lv: String,
     val minorityAge: Int,
     val nameOrder: List<String>,
     val notificationService: String,
@@ -45,7 +46,7 @@ data class CountryResponseData(
     val pnDocId: String,
     val pushyApiEndpoint: String,
     val pushyMqttEndpoint: String,
-    val regionMap: Map<String, Region>,
+    val regionMap: Map<String, Region> = mapOf(),
     val reviewConfig: ReviewConfig,
     val safetyBannerInterval: Int,
     val touDocId: String,
