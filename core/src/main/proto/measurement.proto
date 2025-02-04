@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package dev.hrx.libregadgets.core.data.message;
+
+import "google/protobuf/timestamp.proto";
+
+option java_package = "dev.hrx.libregadgets.core.data.message";
+
+message GlucoseMeasurement {
+  uint32 value = 1;
+  MeasurementEvaluation evaluation = 2;
+  MeasurementTrend trend = 3;
+  .google.protobuf.Timestamp timestamp = 4;
+}
+
+enum MeasurementTrend {
+  Unknown = 0;
+  FallQuick = 1;
+  Fall = 2;
+  Stable = 3;
+  Rise = 4;
+  RiseQuick = 5;
+}
+
+enum MeasurementEvaluation {
+  Normal = 0;
+  High = 1;
+  Low = 2;
+}

@@ -1,24 +1,41 @@
 [versions]
-agp = "8.3.0"
-kotlin = "1.9.0"
+agp = "8.6.1"
+horologist = "0.7.2-alpha"
+kotlin = "1.9.23"
 kotlinSerialization = "1.9.23"
-kotlinxSerializationJson = "1.6.0"
-coreKtx = "1.12.0"
+kotlinxSerializationJson = "1.6.3"
+coreKtx = "1.13.1"
+datastore = "1.1.1"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-lifecycleRuntimeKtx = "2.7.0"
-activityCompose = "1.8.2"
-composeBom = "2024.02.02"
-glance = "1.1.0-alpha01"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+lifecycleRuntimeKtx = "2.8.6"
+activityCompose = "1.9.2"
+composeBom = "2024.09.03"
+composeWear = "1.4.0"
+glance = "1.1.0"
 okhttp = "4.12.0"
 okhttpCoroutines = "1.0"
-workRuntimeKtx = "2.9.0"
+watchfaceComplicationsDataSourceKtx = "1.2.1"
+workRuntimeKtx = "2.9.1"
 smartspacer = "1.0.3"
+appcompat = "1.7.0"
+material = "1.12.0"
+playServicesWearable = "18.2.0"
+coreSplashscreen = "1.0.1"
+wearInput = "1.2.0-alpha02"
+hilt = "2.51.1"
+protobuf = "4.26.1"
+tiles = "1.5.0-alpha01"
+protolayout = "1.3.0-alpha01"
 
 [libraries]
+androidx-watchface-complications-data-source-ktx = { module = "androidx.wear.watchface:watchface-complications-data-source-ktx", version.ref = "watchfaceComplicationsDataSourceKtx" }
+horologist-compose-layout = { group = "com.google.android.horologist", name = "horologist-compose-layout", version.ref = "horologist" }
+horologist-tiles = { group = "com.google.android.horologist", name = "horologist-tiles", version.ref = "horologist" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -34,14 +51,34 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-glance = { group = "androidx.glance", name = "glance", version.ref = "glance" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+androidx-glance-wear-tiles = { group = "androidx.glance", name = "glance-wear-tiles", version = "1.0.0-alpha05" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
+androidx-wear-compose = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeWear" }
+androidx-wear-tooling = { group = "androidx.wear.compose", name = "compose-ui-tooling", version.ref = "composeWear" }
+androidx-wear-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "composeWear" }
 squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 squareup-okhttp-coroutines = { group = "ru.gildor.coroutines", name = "kotlin-coroutines-okhttp", version.ref = "okhttpCoroutines" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 kieronquinn-smartspacer = { group = "com.kieronquinn.smartspacer", name = "sdk-plugin", version.ref = "smartspacer" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-wear-input = { group = "androidx.wear", name = "wear-input", version.ref = "wearInput" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }
+androidx-wear-tiles = { group = "androidx.wear.tiles", name = "tiles", version.ref = "tiles" }
+androidx-wear-tiles-renderer = { group = "androidx.wear.tiles", name = "tiles-renderer", version.ref = "tiles" }
+androidx-wear-protolayout = { group = "androidx.wear.protolayout", name = "protolayout", version.ref = "protolayout" }
+androidx-wear-protolayout-material = { group = "androidx.wear.protolayout", name = "protolayout-material", version.ref = "protolayout" }
+guava = { group = "com.google.guava", name = "guava", version = "31.0.1-android" }
+guava-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version = "1.7.3" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization" }
-
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+protobuf = { id = "com.google.protobuf", version = "0.9.4" }

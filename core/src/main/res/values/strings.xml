@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="poll_service_description">Service used by LibreGadgets to update the widget</string>
+    <string name="foreground_service_notification_channel_name">Foreground service</string>
+    <string name="foreground_service_notification_title">Listening for glucose data</string>
+    <string name="foreground_service_notification_description">The app is polling for glucose data in the background</string>
+</resources>

@@ -20,4 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "LibreGadgets"
-include(":app")
+include(":core")
+include(":phone")
+include(":wear")
